@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lesson 3: Charisms Explorer (Standalone v3)</title>
+<style>
+  :root { --purple-600:#7c3aed; --purple-700:#6d28d9; --blue-600:#2563eb; --blue-50:#eff6ff; --blue-200:#bfdbfe; --green-600:#16a34a; --green-700:#15803d; --amber-50:#fffbeb; --amber-400:#f59e0b; --amber-500:#f59e0b; --indigo-600:#4f46e5; --yellow-50:#fffbeb; --yellow-400:#facc15; --yellow-600:#ca8a04; --yellow-900:#713f12; --red-50:#fef2f2; --red-700:#b91c1c; --red-900:#7f1d1d; --gray-50:#f9fafb; --gray-200:#e5e7eb; --gray-300:#d1d5db; --gray-600:#4b5563; }
+  body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;background:linear-gradient(135deg,var(--gray-50),var(--blue-50));}
+  .container{max-width:72rem;margin:0 auto;padding:1rem 2rem;}
+  .card{background:#fff;border:2px solid var(--gray-200);border-radius:.75rem;box-shadow:0 6px 18px rgba(0,0,0,.06);} .p-6{padding:1.5rem;} .p-8{padding:2rem;} .space-y-6>*+*{margin-top:1.5rem;} .w-full{width:100%;}
+  .btn{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem;border:none;border-radius:.75rem;font-weight:600;cursor:pointer;}
+  .btn-primary{background:var(--purple-600);color:#fff;} .btn-primary:hover{background:#6d28d9;} .btn-green{background:var(--green-600);color:#fff;} .btn-green:hover{background:var(--green-700);} .btn-blue{background:var(--blue-600);color:#fff;} .btn-blue:hover{background:#1d4ed8;} .btn-disabled{background:var(--gray-300);color:#6b7280;cursor:not-allowed;}
+  .title-3xl{font-size:1.875rem;font-weight:800;} .title-2xl{font-size:1.5rem;font-weight:800;} .title-xl{font-size:1.25rem;font-weight:700;} .title-lg{font-size:1.125rem;font-weight:700;}
+  .input,textarea{width:100%;padding:.75rem;border:2px solid #d1d5db;border-radius:.5rem;font-size:1rem;} .input:focus,textarea:focus{outline:none;border-color:var(--purple-600);} textarea{resize:none;}
+  .badge{display:inline-block;padding:.25rem .5rem;border-radius:999px;font-size:.75rem;font-weight:600;} .text-lg{font-size:1.125rem;}
+  .gradient-purple-blue{background:linear-gradient(90deg,#7c3aed,#2563eb);color:#fff;}
+  .keating-bg{background:var(--red-50);} .keating-border{border-color:#b91c1c;} .keating-text{color:#7f1d1d;} .keating-btn{background:#b91c1c;color:#fff;} .keating-accent{background:#fde2e2;}
+  .rice-bg{background:#ecfdf5;} .rice-border{border-color:#047857;} .rice-text{color:#065f46;} .rice-btn{background:#047857;color:#fff;} .rice-accent{background:#d1fae5;}
+  .mackillop-bg{background:var(--yellow-50);} .mackillop-border{border-color:#ca8a04;} .mackillop-text{color:#713f12;} .mackillop-btn{background:#ca8a04;color:#fff;} .mackillop-accent{background:#fef3c7;}
+  .mcauley-bg{background:#eff6ff;} .mcauley-border{border-color:#1e40af;} .mcauley-text{color:#1e3a8a;} .mcauley-btn{background:#1e40af;color:#fff;} .mcauley-accent{background:#dbeafe;}
+  .grid-houses{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;} @media(max-width:1200px){.grid-houses{grid-template-columns:repeat(2,1fr);} } @media(max-width:640px){.grid-houses{grid-template-columns:1fr;} }
+  .house-card{height:100%;display:flex;flex-direction:column;} .card-body{flex:1;display:flex;flex-direction:column;justify-content:space-between;}
+  .house-avatar{width:5rem;height:5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin:0 auto;}
+  .house-badges{min-height:2rem;}
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="app"></div>
+  <div class="text-center text-sm" style="color:#4b5563;margin-top:2rem;">
+    <p>Year 9 Religious Education<br/>Unit 5: Faces of Faith</p>
+    <p class="mt-1">Lesson 3: Comparative Analysis of Religious Vocations</p>
+  </div>
+</div>
+<script>
+(function(){
+  const state = { stage:'intro', brainstormNotes:'', topCharisms:['','',''], selectedHouse:'', comprehensionAnswers:{}, clozeAnswers:['',''], reflectionStarted:false };
+  const save=()=>localStorage.setItem('lesson3-charisms-standalone-v3', JSON.stringify(state));
+  const load=()=>{ try{ const s=JSON.parse(localStorage.getItem('lesson3-charisms-standalone-v3')); if(s) Object.assign(state,s);}catch{} };
+  load();
+  const houses={
+    keating:{name:'Keating',colour:'keating',saint:'Brian Keating (Goulburn local)',charisms:[
+      {name:'Compassion',definition:'A deep awareness of the suffering of others coupled with the desire to relieve it',words:['caring','empathetic','kind','understanding','merciful'],actions:['Listening to someone who is struggling','Helping those in need without being asked','Standing up for the vulnerable','Showing kindness to those who are hurting'],examples:['Opening opportunities for local families','Volunteering at a homeless shelter','Comforting a friend going through a difficult time']},
+      {name:'Justice',definition:'Working to ensure fair and equitable treatment for all people, especially the marginalised',words:['fair','advocate','equality','rights','integrity'],actions:['Speaking out against unfair treatment','Supporting initiatives that help the disadvantaged','Treating everyone with dignity','Challenging systems of oppression'],examples:['Defending the rights of the poor','Organising fundraisers for developing nations','Standing against bullying and discrimination']},
+      {name:'Kindness',definition:'Choosing to be generous, considerate and caring in words and actions',words:['gentle','caring','generous','considerate','friendly'],actions:['Using kind words even in disagreements','Including others in games and group work','Offering help without being asked','Looking for small ways to brighten someone\'s day'],examples:['Writing a thank-you note','Checking in on someone who looks down','Helping a classmate catch up on work']}
+    ]},
+    rice:{name:'Rice',colour:'rice',saint:'Edmund Rice',charisms:[
+      {name:'Courage',definition:'The ability to do what is right even when it is difficult or unpopular',words:['brave','determined','fearless','persistent','strong'],actions:['Standing up for what you believe in','Taking risks to help others','Speaking truth even when it\'s uncomfortable','Persevering through challenges'],examples:['Standing firm in convictions','Defending a classmate being bullied','Admitting when you\'ve made a mistake']},
+      {name:'Humility',definition:'Recognising that all gifts come from God and using them to serve others',words:['modest','humble','selfless','grateful','servant-hearted'],actions:['Giving credit to others','Serving without seeking recognition','Learning from mistakes','Accepting help from others'],examples:['Serving in remote communities','Helping with classroom tasks','Thanking those who support you']},
+      {name:'Perseverance',definition:'Continuing to work towards goals despite obstacles and setbacks',words:['resilient','determined','persistent','dedicated','steadfast'],actions:['Continuing to try after failure','Completing difficult tasks','Supporting others through tough times','Not giving up on people'],examples:['Establishing schools despite opposition','Studying hard for challenging subjects','Maintaining friendships through difficulties']}
+    ]},
+    mackillop:{name:'Mackillop',colour:'mackillop',saint:'Mary Mackillop',charisms:[
+      {name:'Faith',definition:'Trust in God and commitment to living according to Gospel values',words:['belief','trust','hope','spiritual','devoted'],actions:['Praying regularly','Making decisions based on values','Trusting in God during difficulties','Participating in religious life'],examples:['Mary Mackillop\'s deep prayer life','Attending Mass and school liturgies','Seeking God\'s guidance in daily choices']},
+      {name:'Service',definition:'Using your gifts and talents to help others and build community',words:['helpful','generous','supportive','giving','selfless'],actions:['Volunteering your time','Using your skills to benefit others','Helping without expecting anything in return','Contributing to community projects'],examples:['Teaching children','Tutoring classmates','Participating in community service activities']},
+      {name:'Education',definition:'Valuing learning and helping others develop their full potential',words:['knowledgeable','curious','teacher','mentor','learner'],actions:['Taking studies seriously','Sharing knowledge with others','Encouraging curiosity','Creating opportunities for learning'],examples:['Establishing schools','Helping peers understand difficult concepts','Reading and expanding knowledge']}
+    ]},
+    mcauley:{name:'McAuley',colour:'mcauley',saint:'Catherine McAuley',charisms:[
+      {name:'Mercy',definition:'Showing compassionate love and care, especially to those who are suffering',words:['compassionate','caring','forgiving','loving','tender'],actions:['Forgiving others','Caring for the sick and suffering','Showing patience with those who struggle','Offering comfort and support'],examples:['Caring for the sick and poor','Visiting someone who is unwell','Offering a second chance']},
+      {name:'Hospitality',definition:'Welcoming others and creating inclusive, safe spaces for all',words:['welcoming','inclusive','friendly','accepting','warm'],actions:['Including others in activities','Making newcomers feel welcome','Creating a sense of belonging','Reaching out to those on the margins'],examples:['Welcoming women into the home','Befriending new students','Including everyone in group activities']},
+      {name:'Gentleness',definition:'Treating others with care, respect, and kindness in all interactions',words:['kind','patient','respectful','considerate','peaceful'],actions:['Speaking kindly to others','Being patient with difficulties','Resolving conflicts peacefully','Treating everyone with dignity'],examples:['A gentle manner','Using encouraging words','Helping someone learn at their own pace']}
+    ]}
+  };
+  const houseColours={keating:{bg:'keating-bg',border:'keating-border',text:'keating-text',btn:'keating-btn',accent:'keating-accent'},rice:{bg:'rice-bg',border:'rice-border',text:'rice-text',btn:'rice-btn',accent:'rice-accent'},mackillop:{bg:'mackillop-bg',border:'mackillop-border',text:'mackillop-text',btn:'mackillop-btn',accent:'mackillop-accent'},mcauley:{bg:'mcauley-bg',border:'mcauley-border',text:'mcauley-text',btn:'mcauley-btn',accent:'mcauley-accent'}};
+  const reflectionStems=['Based on my charism results, I feel called to use my gift of','I can see similarities between my personal charisms and my House charisms in the way that','In my daily life at school, I could express these charisms by','The charism that resonates most strongly with me is','I believe God is calling me to serve others through'];
+  const el=(t,p={},c=[])=>{const n=document.createElement(t);Object.entries(p).forEach(([k,v])=>{if(k==='class')n.className=v;else if(k==='text')n.textContent=v;else if(k==='style')n.setAttribute('style',v);else if(k.startsWith('on'))n.addEventListener(k.slice(2),v);else n.setAttribute(k,v);});c.forEach(x=>n.appendChild(typeof x==='string'?document.createTextNode(x):x));return n;};
+  const app=document.getElementById('app');
+  // Back button helper
+  function backButton(prev){ const bar=el('div',{class:'flex items-center',style:'margin-bottom:.75rem;'}); const btn=el('button',{class:'btn',style:'background:#e5e7eb;color:#111827;'},['← Back']); btn.onclick=()=>{state.stage=prev;save();mount();}; bar.appendChild(btn); return bar; }
+
+  function renderIntro(){ const root=el('div',{class:'space-y-6'});
+    root.appendChild(el('div',{class:'gradient-purple-blue p-8 rounded-lg'},[ el('h1',{class:'title-3xl',text:'Lesson 3: Comparative Analysis of Religious Vocations'}), el('div',{class:'card p-6',style:'background:rgba(255,255,255,0.2); border:none;'},[ el('h2',{class:'title-xl',text:'Learning Intention'}), el('p',{class:'text-lg',text:'To explore and understand personal charisms and how they connect to our vocational calling within the Catholic tradition'}) ]) ]));
+    const btn=el('button',{class:'btn btn-primary w-full'},['Begin Exploration']); btn.onclick=()=>{state.stage='brainstorm';save();mount();}; root.appendChild(btn); return root; }
+
+  function renderBrainstorm(){ const root=el('div',{class:'space-y-6'}); root.appendChild(backButton('intro'));
+    root.appendChild(el('div',{class:'p-6 rounded-lg',style:'background:linear-gradient(90deg,#2563eb,#22d3ee); color:#fff;'},[ el('h2',{class:'title-2xl',text:'Brainstorm: What are Charisms?'}), el('p',{class:'text-lg',text:'Think about what you already know about gifts, talents, and how they might be used to serve others.'}) ]));
+    const card=el('div',{class:'card p-6'},[ el('h3',{class:'title-xl',text:'Reflection Prompts:'}), el('ul',{},[ el('li',{},['• What gifts or talents do you think you have?']), el('li',{},['• How might these gifts be used to help others?']), el('li',{},['• What does it mean for a gift to come from the Holy Spirit?']), el('li',{},['• How do charisms differ from regular skills or abilities?']) ]), el('div',{class:'p-6',style:'background:#eff6ff;border-radius:.5rem;'},[ el('label',{class:'text-sm',text:'📝 Jot down a few points here (You\'ll also write in your workbook on page 13):'}), (()=>{const ta=el('textarea',{rows:'8'}); ta.value=state.brainstormNotes; ta.oninput=e=>{state.brainstormNotes=e.target.value;save();}; return ta;})() ]) ]);
+    root.appendChild(card);
+    const btn=el('button',{class:'btn btn-blue w-full'},['Continue to Charisms Quiz']); btn.onclick=()=>{state.stage='quiz';save();mount();}; root.appendChild(btn); return root; }
+
+  function renderQuiz(){ const root=el('div',{class:'space-y-6'}); root.appendChild(backButton('brainstorm'));
+    root.appendChild(el('div',{class:'p-6 rounded-lg',style:'background:linear-gradient(90deg,#16a34a,#0f766e); color:#fff;'},[ el('h2',{class:'title-2xl',text:'Discover Your Charisms'}), el('p',{class:'text-lg',text:'Take the online charisms assessment to discover your spiritual gifts'}) ]));
+    const card=el('div',{class:'card p-6'},[ el('h3',{class:'title-xl',text:'Charisms Quiz'}), el('div',{},[ el('p',{text:'The Newman Online Theology on Tap Charisms Assessment will help you identify your top spiritual gifts.'}), el('a',{href:'https://www.newmanonline.org/theologyontap-gifts-test',target:'_blank',class:'btn btn-green w-full'},['Open Charisms Quiz']) ]) ]);
+    root.appendChild(card);
+    const record=el('div',{class:'card p-6'},[ el('h3',{class:'title-xl',text:'Record Your Top 3 Charisms'}), el('div',{},[0,1,2].map(idx=>{ const box=el('div'); box.appendChild(el('label',{class:'text-sm',text:`Charism #${idx+1}:`})); const inp=el('input',{type:'text',class:'input'}); inp.value=state.topCharisms[idx]; inp.oninput=e=>{state.topCharisms[idx]=e.target.value;save();toggleNext();}; box.appendChild(inp); return box; })) ]);
+    root.appendChild(record);
+    const next=el('button',{id:'nextToHouse',class:'btn w-full'},['Continue to House Selection']); function toggleNext(){ const disabled=state.topCharisms.some(c=>!c.trim()); next.className='btn w-full '+(disabled?'btn-disabled':'btn-green'); next.disabled=disabled; } toggleNext();
+    next.onclick=()=>{ if(next.disabled) return; state.stage='house'; save(); mount(); }; root.appendChild(next);
+    return root; }
+
+  function renderHouse(){ const root=el('div',{class:'space-y-6'}); root.appendChild(backButton('quiz'));
+    root.appendChild(el('div',{class:'p-6 rounded-lg',style:'background:linear-gradient(90deg,#7c3aed,#ec4899); color:#fff;'},[ el('h2',{class:'title-2xl',text:'Select Your House'}), el('p',{class:'text-lg',text:'Choose your Trinity Catholic College house to explore its charisms'}) ]));
+    const grid=el('div',{class:'grid-houses'});
+    Object.entries(houses).forEach(([key, house])=>{ const colours=houseColours[key]; const card=el('button',{class:`card p-6 house-card ${colours.bg} ${colours.border}`,style:'border-width:4px;'},[ el('div',{class:'text-center space-y-6 card-body'},[ el('div',{class:`house-avatar badge ${colours.btn}`},['🏠']), el('h3',{class:`title-2xl ${colours.text}`,text:house.name}), el('p',{class:`text-sm ${colours.text}`,text:`Inspired by ${house.saint}`,style:'opacity:.8;'}), el('div',{class:'house-badges'}, house.charisms.map(c=>el('span',{class:`badge ${colours.accent} ${colours.text}`},[c.name]))) ]) ]); card.onclick=()=>{state.selectedHouse=key;state.stage='explore';save();mount();}; grid.appendChild(card); });
+    root.appendChild(grid);
+    return root; }
+
+  function renderExplore(){ const key=state.selectedHouse; if(!key) return el('div'); const house=houses[key]; const colours=houseColours[key]; const root=el('div',{class:'space-y-6'}); root.appendChild(backButton('house'));
+    root.appendChild(el('div',{class:`card p-6 ${colours.bg} ${colours.border}`,style:'border-width:4px;'},[ el('div',{class:'flex items-center justify-between'},[ el('div',{},[ el('h2',{class:`title-3xl ${colours.text}`,text:`${house.name} House`}), el('p',{class:`text-lg ${colours.text}`,text:`Inspired by ${house.saint}`,style:'opacity:.8;'}) ]), el('div',{class:`badge ${colours.btn}`,style:'width:4rem;height:4rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.25rem;'},['❤️']) ]) ]));
+    let selectedCharism=0; const tabs=el('div',{class:'flex',style:'border-bottom:1px solid #e5e7eb;'}); const content=el('div',{class:'p-6 space-y-6 card',style:'border-width:2px;'});
+    function draw(){ content.innerHTML=''; const c=house.charisms[selectedCharism]; content.appendChild(el('div',{class:`p-4 ${colours.accent}`,style:'border-radius:.5rem;'},[ el('h4',{class:`title-lg ${colours.text}`,text:'Definition:'}), el('p',{text:c.definition}) ])); const grid=el('div',{class:'flex gap-4 flex-wrap'});
+      const kw=el('div',{class:'p-4',style:'background:#f9fafb;border-radius:.5rem;flex:1 1 240px;'}); kw.appendChild(el('h4',{class:'title-lg',text:'Key Words'})); const kwWrap=el('div',{class:'flex flex-wrap gap-2'}); c.words.forEach(w=>kwWrap.appendChild(el('span',{class:`badge ${colours.accent} ${colours.text}`},[w]))); kw.appendChild(kwWrap);
+      const act=el('div',{class:'p-4',style:'background:#f9fafb;border-radius:.5rem;flex:1 1 240px;'}); act.appendChild(el('h4',{class:'title-lg',text:'Actions'})); const ulA=el('ul',{}); c.actions.forEach(a=>ulA.appendChild(el('li',{},['• ',a]))); act.appendChild(ulA);
+      const ex=el('div',{class:'p-4',style:'background:#f9fafb;border-radius:.5rem;flex:1 1 240px;'}); ex.appendChild(el('h4',{class:'title-lg',text:'Examples'})); const ulE=el('ul',{}); c.examples.forEach(e=>ulE.appendChild(el('li',{},['• ',e]))); ex.appendChild(ulE);
+      grid.appendChild(kw); grid.appendChild(act); grid.appendChild(ex); content.appendChild(grid); }
+    house.charisms.forEach((c,i)=>{ const b=el('button',{class:`btn ${i===0?colours.btn:''}`,style:'flex:1;border-radius:0;'},[c.name]); b.onclick=()=>{selectedCharism=i; Array.from(tabs.children).forEach((ch,idx)=>ch.className='btn '+(idx===i?colours.btn:'')); draw();}; tabs.appendChild(b); });
+    root.appendChild(el('div',{class:'card',style:'overflow:hidden;'},[ el('div',{class:`p-4 ${colours.bg}`,style:'border-bottom:4px solid;'},[ el('h3',{class:`title-xl ${colours.text} text-center`,text:`Explore ${house.name} House Charisms`}) ]), tabs, content ]));
+    draw();
+    const btn=el('button',{class:`btn w-full ${colours.btn}`},['Continue to Comprehension Task']); btn.onclick=()=>{state.stage='comprehension';save();mount();}; root.appendChild(btn); return root; }
+
+  function renderComprehension(){ const key=state.selectedHouse; if(!key) return el('div'); const house=houses[key]; const colours=houseColours[key]; const root=el('div',{class:'space-y-6'}); root.appendChild(backButton('explore'));
+    root.appendChild(el('div',{class:`card p-6 ${colours.bg} ${colours.border}`,style:'border-width:4px;'},[ el('h2',{class:`title-2xl ${colours.text}`,text:'Comprehension Task'}), el('p',{text:`Answer the following questions about ${house.name} House charisms`}) ]));
+    const qs=[ {id:'q1',q:`What are the three main charisms of ${house.name} House?`}, {id:'q2',q:`How does the charism of "${house.charisms[0].name}" reflect the work of ${house.saint}?`}, {id:'q3',q:`Give one practical example of how a Year 9 student could demonstrate the charism of "${house.charisms[1].name}" at school.`} ];
+    const card=el('div',{class:'card p-6'}); qs.forEach((q,i)=>{ const blk=el('div',{class:'space-y-2'}); blk.appendChild(el('label',{class:'title-lg',text:`${i+1}. ${q.q}`})); const ta=el('textarea',{rows:'4'}); ta.value=state.comprehensionAnswers[q.id]||''; ta.oninput=e=>{state.comprehensionAnswers[q.id]=e.target.value;save();}; blk.appendChild(ta); card.appendChild(blk); }); root.appendChild(card);
+    const cloze=el('div',{class:'card p-6'}); cloze.appendChild(el('h3',{class:'title-xl',text:'Cloze Passage: Understanding Charisms'})); const p=el('p',{class:'text-lg',style:'background:#f5f3ff;padding:1rem;border-radius:.5rem;'});
+    p.appendChild(document.createTextNode('A ')); p.appendChild(el('strong',{text:'charism'})); p.appendChild(document.createTextNode(' is a gift or grace of the '));
+    const in1=el('input',{type:'text',class:'input',style:'width:12rem;display:inline-block;margin:0 .5rem;'}); in1.value=state.clozeAnswers[0]; in1.oninput=e=>{state.clozeAnswers[0]=e.target.value;save();toggle();}; p.appendChild(in1);
+    p.appendChild(document.createTextNode(' given for the benefit of ')); const in2=el('input',{type:'text',class:'input',style:'width:12rem;display:inline-block;margin:0 .5rem;'}); in2.value=state.clozeAnswers[1]; in2.oninput=e=>{state.clozeAnswers[1]=e.target.value;save();toggle();}; p.appendChild(in2);
+    p.appendChild(document.createTextNode('. Charisms are not given for our own personal gain, but to build up the Church and serve the community.')); cloze.appendChild(p);
+    const next=el('button',{class:'btn w-full'},['Check Answer & Continue']); function toggle(){ const dis=!state.clozeAnswers[0].trim()||!state.clozeAnswers[1].trim(); next.className='btn w-full '+(dis?'btn-disabled':'btn-primary'); next.disabled=dis; } toggle();
+    next.onclick=()=>{ const a1=state.clozeAnswers[0].toLowerCase().trim(); const a2=state.clozeAnswers[1].toLowerCase().trim(); const ok1=['holy spirit','the holy spirit'].includes(a1); const ok2=['others','other people'].includes(a2); if(ok1&&ok2){ alert('Correct! Well done.'); state.stage='reflection'; save(); mount(); } else { alert('Not quite. Remember: Charisms are gifts of the HOLY SPIRIT given for the benefit of OTHERS.'); } };
+    cloze.appendChild(next); root.appendChild(cloze); return root; }
+
+  function renderReflection(){ const key=state.selectedHouse; const colours=key?houseColours[key]:null; const root=el('div',{class:'space-y-6'}); root.appendChild(backButton('comprehension'));
+    root.appendChild(el('div',{class:'p-6 rounded-lg',style:'background:linear-gradient(90deg,#4f46e5,#7c3aed); color:#fff;'},[ el('h2',{class:'title-2xl',text:'Personal Reflection'}), el('p',{class:'text-lg',text:'Reflect on how you feel called to use your gifts and talents'}) ]));
+    const card=el('div',{class:'card p-6'}); const accent=el('div',{class:'p-4',style:'background:#eef2ff;border-radius:.5rem;'}); accent.appendChild(el('h3',{class:'title-lg',text:'Your Personal Charisms:'})); const chips=el('div',{}); state.topCharisms.forEach(c=>chips.appendChild(el('span',{class:'badge',style:'background:#7c3aed;color:#fff;margin-right:.5rem;'},[c]))); accent.appendChild(chips); card.appendChild(accent);
+    const check=el('label',{class:'flex items-center',style:'gap:.5rem;margin-top:1rem;'}); const cb=el('input',{type:'checkbox'}); cb.checked=!!state.reflectionStarted; cb.onchange=e=>{state.reflectionStarted=e.target.checked;save();}; check.appendChild(cb); check.appendChild(el('span',{},['I have completed my reflection in my workbook (page 13)'])); card.appendChild(check); root.appendChild(card);
+    const done=el('div',{class:'card p-6'}); done.appendChild(el('h3',{class:'title-xl'},['✔️ ','Lesson Complete!'])); if(state.reflectionStarted){ const back=el('button',{class:'btn btn-primary w-full',style:'margin-top:1rem;'},['↩︎ Return to Beginning']); back.onclick=()=>{state.stage='intro';save();mount();}; done.appendChild(back);} root.appendChild(done); return root; }
+
+  function mount(){ app.innerHTML=''; let view; switch(state.stage){ case 'intro': view=renderIntro(); break; case 'brainstorm': view=renderBrainstorm(); break; case 'quiz': view=renderQuiz(); break; case 'house': view=renderHouse(); break; case 'explore': view=renderExplore(); break; case 'comprehension': view=renderComprehension(); break; case 'reflection': view=renderReflection(); break; default: state.stage='intro'; save(); view=renderIntro(); }
+    app.appendChild(view); }
+  mount();
+})();
+</script>
+</body>
+</html>

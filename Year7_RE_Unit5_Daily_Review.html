@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 7 RE Unit 5 - Daily Review Quiz</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Lucide React icons as inline SVG components
+        const Shuffle = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="16 3 21 3 21 8"></polyline>
+                <line x1="4" y1="20" x2="21" y2="3"></line>
+                <polyline points="21 16 21 21 16 21"></polyline>
+                <line x1="15" y1="15" x2="21" y2="21"></line>
+                <line x1="4" y1="4" x2="9" y2="9"></line>
+            </svg>
+        );
+
+        const CheckCircle = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+        );
+
+        const XCircle = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+            </svg>
+        );
+
+        const Award = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="7"></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+            </svg>
+        );
+
+        const Brain = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"></path>
+                <path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"></path>
+            </svg>
+        );
+
+        const Heart = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        );
+
+        const DailyReviewQuiz = () => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [showFeedback, setShowFeedback] = useState(false);
+            const [score, setScore] = useState(0);
+            const [completed, setCompleted] = useState(false);
+            const [shuffledAnswers, setShuffledAnswers] = useState([]);
+            const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+            const allQuestions = [
+                {
+                    id: 1,
+                    type: 'multiple-choice',
+                    category: 'Understanding',
+                    question: "Unspoken rules are behavioral guidelines that are:",
+                    answers: [
+                        { text: "Written down and displayed on posters in every classroom", correct: false },
+                        { text: "Not typically voiced or written down but understood through shared attitudes", correct: true },
+                        { text: "Only followed by adults in formal settings", correct: false },
+                        { text: "The same as the Ten Commandments", correct: false }
+                    ],
+                    explanation: "Unspoken rules are behavioral constraints that aren't typically voiced or written down - they're understood through time-honored attitudes and compromises that help hold society together."
+                },
+                {
+                    id: 2,
+                    type: 'application',
+                    category: 'Real-World Application',
+                    question: "During an ANZAC ceremony, everyone stands silently during the Last Post. This is an example of:",
+                    answers: [
+                        { text: "A spoken rule enforced by law", correct: false },
+                        { text: "An unspoken rule showing respect and reverence", correct: true },
+                        { text: "A written commandment from the Decalogue", correct: false },
+                        { text: "Personal preference with no wider meaning", correct: false }
+                    ],
+                    explanation: "This demonstrates an unspoken rule of our community - we understand that standing silently shows respect for those who served, even though it's not written down as a law."
+                },
+                {
+                    id: 3,
+                    type: 'definition',
+                    category: 'Vocabulary',
+                    question: "What does the term 'Decalogue' refer to?",
+                    answers: [
+                        { text: "The unspoken rules of Australian society", correct: false },
+                        { text: "The Ten Commandments given to Moses on Mount Sinai", correct: true },
+                        { text: "The prayers Jesus taught his disciples", correct: false },
+                        { text: "Modern laws created by parliament", correct: false }
+                    ],
+                    explanation: "The Decalogue means 'ten words' and refers to the Ten Commandments - rules of behavior God gave to Israel through Moses, recorded in Exodus 20 and Deuteronomy 5."
+                },
+                {
+                    id: 4,
+                    type: 'non-example',
+                    category: 'Understanding Integrity',
+                    question: "Which of these is NOT an example of moral integrity?",
+                    answers: [
+                        { text: "Returning extra change a cashier gave you by mistake", correct: false },
+                        { text: "Only being honest when someone is watching you", correct: true },
+                        { text: "Standing up for someone being bullied even when it's unpopular", correct: false },
+                        { text: "Admitting you made a mistake even though no one knows", correct: false }
+                    ],
+                    explanation: "Moral integrity means doing the right thing even when no one is watching. If you're only honest when being observed, you lack true integrity - as C.S. Lewis said, integrity is 'doing the right thing, even when no one is looking.'"
+                },
+                {
+                    id: 5,
+                    type: 'application',
+                    category: 'Scripture Application',
+                    question: "A student sees their friend cheating on a test. Applying the Golden Rule (Matthew 7:12), what should guide their response?",
+                    answers: [
+                        { text: "Ignore it because it's not their problem", correct: false },
+                        { text: "Consider: 'If I were making a poor choice, would I want someone to help me do the right thing?'", correct: true },
+                        { text: "Immediately tell the teacher to get their friend in trouble", correct: false },
+                        { text: "Help them cheat because they'd want help too", correct: false }
+                    ],
+                    explanation: "The Golden Rule asks us to treat others as we'd want to be treated. If we were making poor choices, we'd want someone to care enough to help us make better decisions - this shows both integrity and genuine care."
+                },
+                {
+                    id: 6,
+                    type: 'multiple-choice',
+                    category: 'Scripture Knowledge',
+                    question: "The Shema (Deuteronomy 6:4-5) is a Jewish prayer that calls believers to:",
+                    answers: [
+                        { text: "Follow unspoken social rules in the community", correct: false },
+                        { text: "Love the Lord their God with all their heart, soul, and might", correct: true },
+                        { text: "Write down all the commandments and display them publicly", correct: false },
+                        { text: "Focus only on following spoken rules", correct: false }
+                    ],
+                    explanation: "The Shema ('Hear, O Israel') calls for complete faithfulness to the covenant by loving God with everything - heart, soul, and might. It focuses on daily life and complete devotion, forming the foundation of Jewish faith."
+                },
+                {
+                    id: 7,
+                    type: 'application',
+                    category: 'Contemporary Issues',
+                    question: "A factory dumping toxic waste into a river that harms the whole community is an example of:",
+                    answers: [
+                        { text: "Personal sin only affecting the factory owner", correct: false },
+                        { text: "Social sin with wider community impacts", correct: true },
+                        { text: "An unspoken rule being followed correctly", correct: false },
+                        { text: "Breaking the Fifth Commandment only", correct: false }
+                    ],
+                    explanation: "Social sin involves actions or systems that harm wider communities and create injustice. Environmental pollution affects entire communities, violating principles of common good and stewardship found in both unspoken community values and the moral framework of the Decalogue."
+                },
+                {
+                    id: 8,
+                    type: 'multiple-choice',
+                    category: 'Understanding the Decalogue',
+                    question: "The Ten Commandments are described as 'spoken rules' because they:",
+                    answers: [
+                        { text: "Were whispered secretly to Moses alone", correct: false },
+                        { text: "Are explicitly stated moral and religious guidelines", correct: true },
+                        { text: "Can be changed whenever society changes", correct: false },
+                        { text: "Only apply to people who speak Hebrew", correct: false }
+                    ],
+                    explanation: "The Ten Commandments are 'spoken rules' - they are explicitly stated, written down, and clearly communicated as a code of ethical conduct. Unlike unspoken rules that are implicitly understood, the Decalogue provides clear, direct moral guidance."
+                },
+                {
+                    id: 9,
+                    type: 'multiple-choice',
+                    category: 'Scripture Knowledge',
+                    question: "In John 13:34-35, Jesus gives a 'new commandment' that focuses on:",
+                    answers: [
+                        { text: "Following all unspoken community rules perfectly", correct: false },
+                        { text: "Loving one another as Jesus has loved us", correct: true },
+                        { text: "Creating new unspoken rules for Christian communities", correct: false },
+                        { text: "Replacing the Ten Commandments with easier rules", correct: false }
+                    ],
+                    explanation: "Jesus' new commandment is to love one another just as He has loved us - sacrificially and unconditionally. This love becomes the identifying mark of His disciples and fulfills the deeper meaning of all the commandments."
+                },
+                {
+                    id: 10,
+                    type: 'non-example',
+                    category: 'Understanding Common Good',
+                    question: "Which is NOT a characteristic of 'common good'?",
+                    answers: [
+                        { text: "Improving wellbeing of people in society", correct: false },
+                        { text: "Only focusing on what benefits you personally", correct: true },
+                        { text: "Creating conditions where everyone can flourish", correct: false },
+                        { text: "Balancing individual rights with community needs", correct: false }
+                    ],
+                    explanation: "Common good focuses on improving the wellbeing of all people in society, not just personal benefit. It requires us to think beyond ourselves to the wider community - both an unspoken expectation in healthy communities and an explicit teaching in Catholic Social Teaching."
+                },
+                {
+                    id: 11,
+                    type: 'application',
+                    category: 'Real-World Application',
+                    question: "At The Simpsons' dinner table, Homer struggles to follow basic table manners. This illustrates:",
+                    answers: [
+                        { text: "That unspoken rules are unimportant and can be ignored", correct: false },
+                        { text: "How unspoken rules guide social situations and show respect for others", correct: true },
+                        { text: "That only spoken rules matter in family settings", correct: false },
+                        { text: "The Decalogue has specific commandments about table manners", correct: false }
+                    ],
+                    explanation: "Table manners are largely unspoken rules that show respect for others sharing the meal. The humor in The Simpsons clip comes from Homer's violation of these understood social expectations - highlighting how important these unspoken guidelines are to harmonious community life."
+                },
+                {
+                    id: 12,
+                    type: 'multiple-choice',
+                    category: 'Understanding Jesus\' Teaching',
+                    question: "How did Jesus draw on his Jewish tradition regarding the commandments?",
+                    answers: [
+                        { text: "He completely rejected the Torah and started fresh", correct: false },
+                        { text: "He taught that the commandments were fulfilled through love of God and neighbor", correct: true },
+                        { text: "He turned all spoken rules into unspoken expectations", correct: false },
+                        { text: "He said only unspoken rules matter now", correct: false }
+                    ],
+                    explanation: "Jesus didn't reject the Torah but fulfilled it, teaching that all the law and prophets hang on two great commandments: loving God completely and loving your neighbor as yourself. He revealed the deeper heart behind the rules."
+                },
+                {
+                    id: 13,
+                    type: 'application',
+                    category: 'Prayer & Reflection',
+                    question: "What is the purpose of Lectio Divina?",
+                    answers: [
+                        { text: "To read Scripture quickly to learn more unspoken rules", correct: false },
+                        { text: "To slowly read, meditate on, and respond to Scripture prayerfully", correct: true },
+                        { text: "To memorize all Ten Commandments word-for-word", correct: false },
+                        { text: "To debate whether rules should be spoken or unspoken", correct: false }
+                    ],
+                    explanation: "Lectio Divina (divine reading) is a contemplative practice of reading Scripture slowly, meditating on its meaning, praying in response, and contemplating what God is saying to us. It helps us move beyond just knowing the rules to having a relationship with the One who gave them."
+                },
+                {
+                    id: 14,
+                    type: 'multiple-choice',
+                    category: 'Catholic Social Teaching',
+                    question: "The 'See-Judge-Act' method helps us to:",
+                    answers: [
+                        { text: "Judge other people's rule-following and report them", correct: false },
+                        { text: "Examine situations, reflect on them morally, and take transformative action", correct: true },
+                        { text: "Decide whether rules should be spoken or unspoken", correct: false },
+                        { text: "List all the commandments we've broken", correct: false }
+                    ],
+                    explanation: "See-Judge-Act is a method for moral and social analysis: See (examine the situation honestly), Judge (reflect on it using moral principles from Scripture and tradition), and Act (work to transform unjust structures). It moves us from knowing to doing."
+                },
+                {
+                    id: 15,
+                    type: 'application',
+                    category: 'Synthesis & Application',
+                    question: "Which scenario best demonstrates applying the Golden Rule AND working toward the common good?",
+                    answers: [
+                        { text: "Keeping quiet about injustice so you don't upset anyone", correct: false },
+                        { text: "Organizing a community clean-up and treating all volunteers with dignity and respect", correct: true },
+                        { text: "Only helping people who follow all the same rules you do", correct: false },
+                        { text: "Complaining about problems without taking any real action", correct: false }
+                    ],
+                    explanation: "This combines treating others as you'd want to be treated (Golden Rule) with working for everyone's wellbeing (common good). It moves beyond individual morality to positive community transformation - integrity in action!"
+                },
+                {
+                    id: 16,
+                    type: 'definition',
+                    category: 'Vocabulary',
+                    question: "C.S. Lewis defined integrity as:",
+                    answers: [
+                        { text: "Following only the rules that are written down", correct: false },
+                        { text: "Doing the right thing, even when no one is looking", correct: true },
+                        { text: "Making sure everyone knows you're following the rules", correct: false },
+                        { text: "Only following unspoken rules, not spoken ones", correct: false }
+                    ],
+                    explanation: "C.S. Lewis, the famous author of The Chronicles of Narnia, defined integrity as 'doing the right thing, even when no one is looking.' This captures the essence of moral integrity - your character is who you are when nobody's watching."
+                },
+                {
+                    id: 17,
+                    type: 'application',
+                    category: 'Real-World Application',
+                    question: "You're in a group project and one member isn't contributing. The unspoken rule is to share work equally. How should integrity guide your response?",
+                    answers: [
+                        { text: "Do nothing and let them fail", correct: false },
+                        { text: "Talk honestly with them about expectations and offer support", correct: true },
+                        { text: "Complain to others but not address it directly", correct: false },
+                        { text: "Do all their work for them to avoid conflict", correct: false }
+                    ],
+                    explanation: "Integrity requires honest, respectful communication. The Golden Rule asks how you'd want to be treated if you were struggling. Common good means addressing the issue constructively so everyone can contribute and learn."
+                },
+                {
+                    id: 18,
+                    type: 'multiple-choice',
+                    category: 'Understanding the Decalogue',
+                    question: "Which commandment teaches us to 'Honor your father and mother'?",
+                    answers: [
+                        { text: "The First Commandment", correct: false },
+                        { text: "The Fourth Commandment", correct: true },
+                        { text: "The Eighth Commandment", correct: false },
+                        { text: "This is an unspoken rule, not a commandment", correct: false }
+                    ],
+                    explanation: "The Fourth Commandment is 'Honor your father and mother.' This is one of the spoken rules from the Decalogue that provides explicit guidance about family relationships and respect for authority."
+                },
+                {
+                    id: 19,
+                    type: 'application',
+                    category: 'Contemporary Issues',
+                    question: "A classmate is spreading rumors on social media about another student. Which combination of moral principles should guide your response?",
+                    answers: [
+                        { text: "Eighth Commandment (bearing false witness) and unspoken rules about treating others with dignity", correct: true },
+                        { text: "Just unspoken rules - the commandments don't apply to social media", correct: false },
+                        { text: "Only what's legally allowed, not moral considerations", correct: false },
+                        { text: "Whatever gets the most likes and shares", correct: false }
+                    ],
+                    explanation: "This situation involves the Eighth Commandment about truthfulness and not bearing false witness, combined with unspoken expectations about human dignity and respect. Both spoken and unspoken moral guidelines call us to stop the harm and support the person being hurt."
+                },
+                {
+                    id: 20,
+                    type: 'synthesis',
+                    category: 'Synthesis & Application',
+                    question: "The relationship between spoken rules (like the Decalogue) and unspoken rules is best described as:",
+                    answers: [
+                        { text: "Competing systems - you follow one or the other", correct: false },
+                        { text: "Complementary - spoken rules provide explicit foundation while unspoken rules guide daily interactions", correct: true },
+                        { text: "Identical - they're just different names for the same thing", correct: false },
+                        { text: "Unconnected - they operate in completely separate areas of life", correct: false }
+                    ],
+                    explanation: "Spoken rules like the Decalogue provide the explicit moral foundation and framework, while unspoken rules help us apply these principles in daily social situations. Together, they create a complete moral framework - from explicit commandments ('You shall not steal') to their daily application (respecting others' belongings, returning lost items, being trustworthy)."
+                }
+            ];
+
+            const shuffleArray = (array) => {
+                const newArray = [...array];
+                for (let i = newArray.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+                }
+                return newArray;
+            };
+
+            // Initialize: Shuffle questions once on component mount
+            useEffect(() => {
+                setShuffledQuestions(shuffleArray(allQuestions));
+            }, []);
+
+            // Shuffle answers whenever the current question changes
+            useEffect(() => {
+                if (shuffledQuestions.length > 0) {
+                    setShuffledAnswers(shuffleArray(shuffledQuestions[currentQuestion].answers));
+                }
+            }, [currentQuestion, shuffledQuestions]);
+
+            const handleAnswerClick = (answer) => {
+                if (showFeedback) return;
+                
+                setSelectedAnswer(answer);
+                setShowFeedback(true);
+                
+                if (answer.correct) {
+                    setScore(score + 1);
+                }
+            };
+
+            const handleNext = () => {
+                if (currentQuestion < shuffledQuestions.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                    setShowFeedback(false);
+                } else {
+                    setCompleted(true);
+                }
+            };
+
+            const resetQuiz = () => {
+                setShuffledQuestions(shuffleArray(allQuestions));
+                setCurrentQuestion(0);
+                setSelectedAnswer(null);
+                setShowFeedback(false);
+                setScore(0);
+                setCompleted(false);
+            };
+
+            const getCategoryColor = (category) => {
+                const colors = {
+                    'Understanding': 'bg-blue-100 text-blue-800',
+                    'Real-World Application': 'bg-green-100 text-green-800',
+                    'Vocabulary': 'bg-purple-100 text-purple-800',
+                    'Understanding Integrity': 'bg-amber-100 text-amber-800',
+                    'Scripture Application': 'bg-rose-100 text-rose-800',
+                    'Contemporary Issues': 'bg-teal-100 text-teal-800',
+                    'Understanding the Decalogue': 'bg-indigo-100 text-indigo-800',
+                    'Scripture Knowledge': 'bg-pink-100 text-pink-800',
+                    'Understanding Common Good': 'bg-orange-100 text-orange-800',
+                    'Understanding Jesus\' Teaching': 'bg-cyan-100 text-cyan-800',
+                    'Prayer & Reflection': 'bg-lime-100 text-lime-800',
+                    'Catholic Social Teaching': 'bg-red-100 text-red-800',
+                    'Synthesis & Application': 'bg-violet-100 text-violet-800'
+                };
+                return colors[category] || 'bg-gray-100 text-gray-800';
+            };
+
+            const getCategoryIcon = (category) => {
+                if (category.includes('Application') || category === 'Synthesis & Application') return <Heart className="w-4 h-4" />;
+                if (category.includes('Scripture') || category === 'Prayer & Reflection') return <Award className="w-4 h-4" />;
+                return <Brain className="w-4 h-4" />;
+            };
+
+            const getScoreMessage = () => {
+                const percentage = (score / shuffledQuestions.length) * 100;
+                if (percentage === 100) return "Outstanding! Perfect score - you've mastered these concepts! 🌟";
+                if (percentage >= 90) return "Excellent work! You have a strong understanding of these principles! 🎯";
+                if (percentage >= 80) return "Great job! You're demonstrating solid learning across spoken rules, integrity, and moral decision-making! 💪";
+                if (percentage >= 70) return "Good effort! You're building a strong foundation in understanding rules and morals! 📚";
+                if (percentage >= 60) return "You're making progress! Review the feedback to strengthen your understanding of the Decalogue and integrity! 🌱";
+                return "Keep learning! Use this feedback to identify key concepts to review about spoken and unspoken rules! 💡";
+            };
+
+            // Don't render until questions are shuffled
+            if (shuffledQuestions.length === 0) {
+                return (
+                    <div className="max-w-3xl mx-auto p-6 flex items-center justify-center min-h-screen">
+                        <div className="text-center">
+                            <Shuffle className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
+                            <p className="text-gray-600">Preparing your personalized quiz...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (completed) {
+                const percentage = Math.round((score / shuffledQuestions.length) * 100);
+                
+                return (
+                    <div className="max-w-2xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg">
+                        <div className="text-center space-y-6">
+                            <div className="inline-block p-4 bg-white rounded-full shadow-md">
+                                <Award className="w-16 h-16 text-amber-500" />
+                            </div>
+                            
+                            <h2 className="text-3xl font-bold text-gray-800">Daily Review Complete!</h2>
+                            
+                            <div className="bg-white p-8 rounded-xl shadow-md space-y-4">
+                                <div className="text-6xl font-bold text-purple-600">{percentage}%</div>
+                                <div className="text-xl text-gray-700">
+                                    You scored <span className="font-bold text-purple-600">{score}</span> out of{' '}
+                                    <span className="font-bold">{shuffledQuestions.length}</span>
+                                </div>
+                                <p className="text-lg text-gray-600 italic">{getScoreMessage()}</p>
+                            </div>
+
+                            <div className="bg-white p-6 rounded-xl shadow-md">
+                                <h3 className="font-semibold text-lg mb-3 text-gray-800">Connection to Today's Film:</h3>
+                                <p className="text-gray-700 leading-relaxed mb-4">
+                                    As you watch "The Bad Guys," consider how the characters navigate both spoken and unspoken rules 
+                                    in their society. Watch for moments when they face moral choices and questions of integrity - 
+                                    particularly C.S. Lewis's definition that integrity is "doing the right thing when no one is watching."
+                                </p>
+                                <p className="text-gray-700 leading-relaxed">
+                                    Notice how the film explores whether people can change their fundamental nature, 
+                                    how the Golden Rule might apply to their relationships, and what happens when characters 
+                                    choose to act with integrity despite their past. These themes connect directly to the 
+                                    Decalogue, moral decision-making, and the principles for living you've been studying!
+                                </p>
+                            </div>
+
+                            <div className="bg-purple-50 border-2 border-purple-200 p-4 rounded-lg">
+                                <p className="text-sm text-purple-800 flex items-center gap-2 justify-center">
+                                    <Shuffle className="w-4 h-4" />
+                                    Every time you retake this quiz, both questions and answers are randomized for a unique experience!
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={resetQuiz}
+                                className="px-8 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 
+                                         transition-colors font-semibold shadow-md flex items-center gap-2 mx-auto"
+                            >
+                                <Shuffle className="w-5 h-5" />
+                                Try Again with Newly Shuffled Questions
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            const currentQ = shuffledQuestions[currentQuestion];
+            const progress = ((currentQuestion + 1) / shuffledQuestions.length) * 100;
+
+            return (
+                <div className="max-w-3xl mx-auto p-6 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl shadow-lg">
+                    {/* Header */}
+                    <div className="mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div>
+                                <h1 className="text-2xl font-bold text-gray-800">Year 7 RE - Unit 5 Daily Review</h1>
+                                <p className="text-gray-600 text-sm mt-1">Principles for Living: Rules, Integrity & Moral Decision-Making</p>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-sm text-gray-600">Question {currentQuestion + 1} of {shuffledQuestions.length}</div>
+                                <div className="text-sm font-semibold text-purple-600">Score: {score}</div>
+                            </div>
+                        </div>
+                        
+                        {/* Progress Bar */}
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                            <div 
+                                className="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-500"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Question Card */}
+                    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            <span className={`px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 ${getCategoryColor(currentQ.category)}`}>
+                                {getCategoryIcon(currentQ.category)}
+                                {currentQ.category}
+                            </span>
+                        </div>
+                        
+                        <h2 className="text-xl font-semibold text-gray-800 mb-6 leading-relaxed">
+                            {currentQ.question}
+                        </h2>
+
+                        {/* Answer Options */}
+                        <div className="space-y-3">
+                            {shuffledAnswers.map((answer, index) => {
+                                const isSelected = selectedAnswer === answer;
+                                const isCorrect = answer.correct;
+                                const showCorrect = showFeedback && isCorrect;
+                                const showIncorrect = showFeedback && isSelected && !isCorrect;
+                                
+                                let buttonClass = "w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ";
+                                
+                                if (showCorrect) {
+                                    buttonClass += "bg-green-50 border-green-500 text-green-900";
+                                } else if (showIncorrect) {
+                                    buttonClass += "bg-red-50 border-red-500 text-red-900";
+                                } else if (isSelected) {
+                                    buttonClass += "bg-purple-50 border-purple-500 text-purple-900";
+                                } else {
+                                    buttonClass += "bg-white border-gray-300 hover:border-purple-400 hover:bg-purple-50 text-gray-800 cursor-pointer";
+                                }
+                                
+                                return (
+                                    <button
+                                        key={index}
+                                        onClick={() => handleAnswerClick(answer)}
+                                        disabled={showFeedback}
+                                        className={buttonClass}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-medium">{answer.text}</span>
+                                            {showFeedback && (
+                                                <span>
+                                                    {isCorrect && <CheckCircle className="w-6 h-6 text-green-600" />}
+                                                    {showIncorrect && <XCircle className="w-6 h-6 text-red-600" />}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Feedback Section */}
+                    {showFeedback && (
+                        <div className={`p-6 rounded-xl mb-6 ${selectedAnswer?.correct ? 'bg-green-50 border-2 border-green-200' : 'bg-amber-50 border-2 border-amber-200'}`}>
+                            <div className="flex items-start gap-3">
+                                <div className="flex-shrink-0 mt-1">
+                                    {selectedAnswer?.correct ? (
+                                        <CheckCircle className="w-6 h-6 text-green-600" />
+                                    ) : (
+                                        <Brain className="w-6 h-6 text-amber-600" />
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className={`font-semibold mb-2 ${selectedAnswer?.correct ? 'text-green-900' : 'text-amber-900'}`}>
+                                        {selectedAnswer?.correct ? 'Correct! Well done! 🌟' : 'Not quite - let\'s learn together! 💡'}
+                                    </h3>
+                                    <p className="text-gray-700 leading-relaxed">{currentQ.explanation}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Navigation */}
+                    {showFeedback && (
+                        <button
+                            onClick={handleNext}
+                            className="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg 
+                                     hover:from-purple-700 hover:to-blue-700 transition-all font-semibold text-lg shadow-md"
+                        >
+                            {currentQuestion < shuffledQuestions.length - 1 ? 'Next Question →' : 'See Results 🎯'}
+                        </button>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<DailyReviewQuiz />);
+    </script>
+</body>
+</html>

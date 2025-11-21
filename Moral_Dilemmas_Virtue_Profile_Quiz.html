@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Moral Dilemmas Quiz - Discovering Your Virtue Profile</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Icon components
+        const Heart = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+        );
+
+        const Sparkles = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path>
+                <path d="M5 3v4"></path>
+                <path d="M19 17v4"></path>
+                <path d="M3 5h4"></path>
+                <path d="M17 19h4"></path>
+            </svg>
+        );
+
+        const Shield = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+        );
+
+        const Clock = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+        );
+
+        const Target = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="6"></circle>
+                <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+        );
+
+        const Award = ({ className }) => (
+            <svg className={className} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="8" r="7"></circle>
+                <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+            </svg>
+        );
+
+        const MoralDilemmaQuiz = () => {
+            const [currentQuestion, setCurrentQuestion] = useState(0);
+            const [selectedAnswer, setSelectedAnswer] = useState(null);
+            const [virtueScores, setVirtueScores] = useState({});
+            const [completed, setCompleted] = useState(false);
+            const [showExplanation, setShowExplanation] = useState(false);
+
+            const virtueInfo = {
+                love: {
+                    name: "Love",
+                    description: "Self-giving care and compassion for others, seeking their wellbeing above personal convenience",
+                    color: "rose",
+                    icon: Heart,
+                    scripture: "Love one another as I have loved you (John 13:34)"
+                },
+                joy: {
+                    name: "Joy",
+                    description: "Deep contentment and positivity that uplifts others, even in challenging circumstances",
+                    color: "yellow",
+                    icon: Sparkles,
+                    scripture: "The joy of the Lord is your strength (Nehemiah 8:10)"
+                },
+                peace: {
+                    name: "Peace",
+                    description: "Bringing calm, resolving conflict, and creating harmony in tense situations",
+                    color: "blue",
+                    icon: Shield,
+                    scripture: "Blessed are the peacemakers (Matthew 5:9)"
+                },
+                patience: {
+                    name: "Patience",
+                    description: "Remaining calm and understanding with others' struggles, giving them time and grace",
+                    color: "green",
+                    icon: Clock,
+                    scripture: "Love is patient, love is kind (1 Corinthians 13:4)"
+                },
+                kindness: {
+                    name: "Kindness",
+                    description: "Showing practical care and thoughtfulness through generous actions",
+                    color: "purple",
+                    icon: Heart,
+                    scripture: "Be kind to one another, tenderhearted (Ephesians 4:32)"
+                },
+                goodness: {
+                    name: "Goodness",
+                    description: "Doing what is morally right and standing up for justice, even when it's difficult",
+                    color: "indigo",
+                    icon: Shield,
+                    scripture: "Hate what is evil; cling to what is good (Romans 12:9)"
+                },
+                faithfulness: {
+                    name: "Faithfulness",
+                    description: "Being reliable, keeping commitments, and honoring your word to others",
+                    color: "teal",
+                    icon: Target,
+                    scripture: "Be faithful, even to the point of death (Revelation 2:10)"
+                },
+                gentleness: {
+                    name: "Gentleness",
+                    description: "Responding with humility and grace rather than harshness or force",
+                    color: "pink",
+                    icon: Heart,
+                    scripture: "A gentle answer turns away wrath (Proverbs 15:1)"
+                },
+                selfControl: {
+                    name: "Self-Control",
+                    description: "Choosing wise responses over impulsive reactions, mastering your emotions and desires",
+                    color: "amber",
+                    icon: Target,
+                    scripture: "Everyone should be quick to listen, slow to speak (James 1:19)"
+                }
+            };
+
+            const dilemmas = [
+                {
+                    id: 1,
+                    scenario: "Your friend is struggling with a difficult assignment that you've already completed. However, you have your own important project due tomorrow that you haven't started. What do you do?",
+                    context: "It's 7pm on a Tuesday evening.",
+                    options: [
+                        {
+                            text: "Set aside your own work for now and spend time helping your friend understand the concepts",
+                            virtue: "love",
+                            reasoning: "You prioritize your friend's need over your own convenience, demonstrating sacrificial love through practical action."
+                        },
+                        {
+                            text: "Explain that you can't help tonight, but offer to meet early tomorrow before school to help them",
+                            virtue: "faithfulness",
+                            reasoning: "You honor your commitment to your own responsibilities while still making a realistic promise to support your friend."
+                        },
+                        {
+                            text: "Take a deep breath, manage your stress, and calmly explain you need to focus on your own work but share helpful resources",
+                            virtue: "selfControl",
+                            reasoning: "You master your impulse to either snap at your friend or abandon your responsibilities, choosing a measured response."
+                        },
+                        {
+                            text: "Patiently listen to their concerns and gently guide them to resources and strategies without doing the work for them",
+                            virtue: "patience",
+                            reasoning: "You give them time to express their frustration and help them develop problem-solving skills rather than just providing answers."
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    scenario: "Two of your friends have had a major falling out and both are asking you to take sides. They're saying hurtful things about each other and the situation is dividing your friend group.",
+                    context: "The conflict started over a misunderstanding but has escalated significantly.",
+                    options: [
+                        {
+                            text: "Refuse to take sides and work to bring both friends together to talk through the misunderstanding",
+                            virtue: "peace",
+                            reasoning: "You actively work to restore harmony and reconciliation rather than allowing division to continue."
+                        },
+                        {
+                            text: "Listen to each friend individually with empathy, acknowledging their hurt without agreeing to judge the other",
+                            virtue: "kindness",
+                            reasoning: "You show practical care for both friends' emotional needs while maintaining neutrality."
+                        },
+                        {
+                            text: "Gently point out to each friend how their words might be hurtful and encourage them to see the other's perspective",
+                            virtue: "gentleness",
+                            reasoning: "You correct them with grace rather than harsh judgment, helping them see the situation more clearly."
+                        },
+                        {
+                            text: "Stand up for what's right by telling both friends that their behavior is wrong and they need to reconcile",
+                            virtue: "goodness",
+                            reasoning: "You take a moral stand against the injustice of gossip and division, even though it's uncomfortable."
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    scenario: "You discover that someone has been spreading untrue rumors about you online. You're hurt and angry, and several friends are encouraging you to 'fight back' with your own posts.",
+                    context: "The rumors could damage your reputation if left unaddressed.",
+                    options: [
+                        {
+                            text: "Take time to calm down before responding, then address it privately with the person directly rather than online",
+                            virtue: "selfControl",
+                            reasoning: "You control your immediate angry impulse and choose a thoughtful, constructive response instead."
+                        },
+                        {
+                            text: "Respond publicly but gently, correcting the misinformation without attacking the person who spread it",
+                            virtue: "gentleness",
+                            reasoning: "You defend yourself with grace and humility rather than matching aggression with aggression."
+                        },
+                        {
+                            text: "Give the person grace and try to understand what might have caused them to act this way, reaching out with compassion",
+                            virtue: "love",
+                            reasoning: "You extend care even to someone who has hurt you, seeking to understand rather than retaliate."
+                        },
+                        {
+                            text: "Wait patiently for the truth to come out naturally rather than rushing to defend yourself in the heat of the moment",
+                            virtue: "patience",
+                            reasoning: "You trust that truth will prevail over time and resist the pressure to react immediately."
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    scenario: "A new student who doesn't speak much English has joined your class and is sitting alone at lunch. Your regular friend group's table is full, and including the new student means someone would have to move to a different table.",
+                    context: "You notice the new student looks lonely and uncomfortable.",
+                    options: [
+                        {
+                            text: "Immediately offer to move to a different table with the new student, inviting others to join you there",
+                            virtue: "love",
+                            reasoning: "You sacrifice your own comfort and familiar social setting to ensure someone else feels welcomed and included."
+                        },
+                        {
+                            text: "Approach the new student with a warm smile and friendly conversation, making them feel valued despite the language barrier",
+                            virtue: "kindness",
+                            reasoning: "You take practical action to show care and make someone feel welcome through thoughtful gestures."
+                        },
+                        {
+                            text: "Make light of the awkward situation with gentle humor and creative problem-solving to include everyone",
+                            virtue: "joy",
+                            reasoning: "You bring positive energy to a difficult social situation, helping everyone feel comfortable."
+                        },
+                        {
+                            text: "Speak up for what's right, insisting that your group make room because excluding someone is wrong",
+                            virtue: "goodness",
+                            reasoning: "You take a moral stand against exclusion, even when it creates social tension."
+                        }
+                    ]
+                },
+                {
+                    id: 5,
+                    scenario: "You witness a classmate cheating on an important test. This person has been under enormous pressure from their parents to maintain perfect grades, and they're clearly stressed and struggling.",
+                    context: "You know the teacher hasn't noticed, and the test is worth a significant portion of the final grade.",
+                    options: [
+                        {
+                            text: "After the test, approach them privately with compassion, asking if they're okay and offering to help them study",
+                            virtue: "love",
+                            reasoning: "You respond to their struggle with care and support rather than judgment, addressing the deeper need."
+                        },
+                        {
+                            text: "Take time to think through the situation carefully before deciding how to respond, not acting on impulse",
+                            virtue: "selfControl",
+                            reasoning: "You resist the urge to either immediately report them or ignore the situation, choosing thoughtful deliberation."
+                        },
+                        {
+                            text: "Speak to them gently after class, explaining that cheating isn't the answer and encouraging them to talk to the teacher",
+                            virtue: "gentleness",
+                            reasoning: "You correct them with kindness and humility, helping them see a better path forward."
+                        },
+                        {
+                            text: "Recognize that despite your sympathy for their stress, cheating is wrong and report it to maintain academic integrity",
+                            virtue: "goodness",
+                            reasoning: "You uphold what is morally right even when it's difficult and despite feeling compassion for their circumstances."
+                        }
+                    ]
+                },
+                {
+                    id: 6,
+                    scenario: "Your group project partner has contributed almost nothing, despite your repeated reminders. The presentation is tomorrow, and you're furious. Your grade depends on this.",
+                    context: "You've done about 90% of the work yourself and feel completely let down.",
+                    options: [
+                        {
+                            text: "Stay calm and contact them one final time, offering practical help if they're genuinely struggling with something",
+                            virtue: "patience",
+                            reasoning: "You extend grace and give them another chance to contribute, seeking to understand rather than condemn."
+                        },
+                        {
+                            text: "Control your anger and calmly speak to the teacher about the situation, focusing on facts rather than emotions",
+                            virtue: "selfControl",
+                            reasoning: "You manage your justified frustration and respond professionally rather than lashing out."
+                        },
+                        {
+                            text: "Meet with the teacher and calmly advocate for fair assessment, standing up for honest work and accountability",
+                            virtue: "goodness",
+                            reasoning: "You speak truth about the injustice while seeking a morally right resolution."
+                        },
+                        {
+                            text: "Complete the project yourself to avoid confrontation, choosing harmony over potential conflict",
+                            virtue: "peace",
+                            reasoning: "You prioritize avoiding conflict and maintaining calm, even at personal cost."
+                        }
+                    ]
+                },
+                {
+                    id: 7,
+                    scenario: "Your best friend tells you in confidence that they're dealing with a serious problem that could harm them. They've made you promise not to tell anyone, including adults who could help.",
+                    context: "You're genuinely worried about their safety and wellbeing.",
+                    options: [
+                        {
+                            text: "Keep their confidence but stay close to them, patiently supporting them and gently encouraging them to seek help",
+                            virtue: "patience",
+                            reasoning: "You give them time and space while remaining supportive, trusting the process of them coming to their own decision."
+                        },
+                        {
+                            text: "Be honest with them that you must tell a trusted adult because you care about them too much to keep silent",
+                            virtue: "goodness",
+                            reasoning: "You do what's morally right even though it means breaking a promise and potentially damaging the friendship."
+                        },
+                        {
+                            text: "Show them love by explaining gently but firmly that true friendship means getting them the help they need",
+                            virtue: "love",
+                            reasoning: "You prioritize their wellbeing over their immediate wishes, showing sacrificial love through difficult action."
+                        },
+                        {
+                            text: "Keep your commitment to them by not telling others, but remain faithfully present and available whenever they need support",
+                            virtue: "faithfulness",
+                            reasoning: "You honor your word and remain a reliable, trustworthy presence in their life."
+                        }
+                    ]
+                },
+                {
+                    id: 8,
+                    scenario: "During a game in PE, your team is losing badly. Some teammates are starting to give up, others are blaming each other, and the atmosphere has become negative and tense.",
+                    context: "There's still time left in the game, but morale is at rock bottom.",
+                    options: [
+                        {
+                            text: "Bring positive energy and encouragement, helping your team enjoy the experience regardless of the score",
+                            virtue: "joy",
+                            reasoning: "You lift spirits and maintain a positive atmosphere even in difficult circumstances."
+                        },
+                        {
+                            text: "Step between arguing teammates and work to restore cooperation and teamwork",
+                            virtue: "peace",
+                            reasoning: "You actively work to resolve conflict and rebuild harmony within the team."
+                        },
+                        {
+                            text: "Give specific, thoughtful encouragement to each struggling teammate, noticing and affirming their efforts",
+                            virtue: "kindness",
+                            reasoning: "You show practical care through words of affirmation and support."
+                        },
+                        {
+                            text: "Stay focused on playing your best and encourage others to keep trying rather than giving up",
+                            virtue: "faithfulness",
+                            reasoning: "You remain committed to the task and encourage others to honor their commitment too."
+                        }
+                    ]
+                },
+                {
+                    id: 9,
+                    scenario: "You've been saving money for something you really want. A family member unexpectedly needs help with an expense, but helping them would mean giving up your goal.",
+                    context: "No one would blame you for saying no - it's your money that you earned and saved.",
+                    options: [
+                        {
+                            text: "Give the money to help your family member, putting their need above your own wants",
+                            virtue: "love",
+                            reasoning: "You sacrifice your own desires to meet someone else's genuine need."
+                        },
+                        {
+                            text: "Work with your family member to find a practical solution that helps them without completely abandoning your goal",
+                            virtue: "kindness",
+                            reasoning: "You show thoughtful care by finding a creative way to support them."
+                        },
+                        {
+                            text: "Resist the impulse to say an immediate 'no' and take time to prayerfully and carefully consider the best choice",
+                            virtue: "selfControl",
+                            reasoning: "You manage your initial disappointment and think through the decision thoughtfully."
+                        },
+                        {
+                            text: "Trust that doing the right thing will work out, giving joyfully rather than reluctantly or resentfully",
+                            virtue: "joy",
+                            reasoning: "You maintain a positive spirit about helping others, finding contentment in generosity."
+                        }
+                    ]
+                },
+                {
+                    id: 10,
+                    scenario: "A younger student is being mocked by a group of older students. No adults are around, and intervening might make you a target too. The younger student looks humiliated and scared.",
+                    context: "You could walk away and no one would know you saw what happened.",
+                    options: [
+                        {
+                            text: "Immediately step in to protect the younger student, standing up against the bullying despite personal risk",
+                            virtue: "goodness",
+                            reasoning: "You take moral action against injustice even when it's costly or uncomfortable."
+                        },
+                        {
+                            text: "Approach calmly and kindly, directing the younger student away from the situation and checking on their wellbeing",
+                            virtue: "kindness",
+                            reasoning: "You take practical action to care for someone who is vulnerable and hurting."
+                        },
+                        {
+                            text: "Control your fear and address the older students firmly but respectfully, de-escalating the situation",
+                            virtue: "selfControl",
+                            reasoning: "You master your anxiety and respond with courage and measured judgment."
+                        },
+                        {
+                            text: "Step in between the groups, working to calm the situation and restore peace without escalating conflict",
+                            virtue: "peace",
+                            reasoning: "You actively work to end the conflict and create a safer, calmer environment."
+                        }
+                    ]
+                }
+            ];
+
+            const handleAnswerSelect = (option) => {
+                setSelectedAnswer(option);
+                setShowExplanation(true);
+                
+                // Update virtue scores
+                const newScores = { ...virtueScores };
+                newScores[option.virtue] = (newScores[option.virtue] || 0) + 1;
+                setVirtueScores(newScores);
+            };
+
+            const handleNext = () => {
+                if (currentQuestion < dilemmas.length - 1) {
+                    setCurrentQuestion(currentQuestion + 1);
+                    setSelectedAnswer(null);
+                    setShowExplanation(false);
+                } else {
+                    setCompleted(true);
+                }
+            };
+
+            const resetQuiz = () => {
+                setCurrentQuestion(0);
+                setSelectedAnswer(null);
+                setVirtueScores({});
+                setCompleted(false);
+                setShowExplanation(false);
+            };
+
+            const getTopVirtues = () => {
+                const sortedVirtues = Object.entries(virtueScores)
+                    .sort(([, a], [, b]) => b - a)
+                    .slice(0, 3);
+                return sortedVirtues;
+            };
+
+            const getVirtueColor = (virtue) => {
+                const colorMap = {
+                    rose: 'from-rose-400 to-pink-600',
+                    yellow: 'from-yellow-400 to-amber-500',
+                    blue: 'from-blue-400 to-indigo-600',
+                    green: 'from-green-400 to-emerald-600',
+                    purple: 'from-purple-400 to-violet-600',
+                    indigo: 'from-indigo-400 to-blue-600',
+                    teal: 'from-teal-400 to-cyan-600',
+                    pink: 'from-pink-400 to-rose-600',
+                    amber: 'from-amber-400 to-orange-600'
+                };
+                return colorMap[virtue] || 'from-gray-400 to-gray-600';
+            };
+
+            if (completed) {
+                const topVirtues = getTopVirtues();
+                const totalResponses = Object.values(virtueScores).reduce((a, b) => a + b, 0);
+
+                return (
+                    <div className="max-w-4xl mx-auto p-6">
+                        <div className="bg-white rounded-2xl shadow-2xl p-8 fade-in">
+                            <div className="text-center mb-8">
+                                <div className="inline-block p-4 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mb-4 pulse-animation">
+                                    <Award className="w-16 h-16 text-white" />
+                                </div>
+                                <h1 className="text-4xl font-bold text-gray-800 mb-2">Your Virtue Profile</h1>
+                                <p className="text-gray-600 text-lg">Discovering the Fruits of the Spirit in Your Moral Decision-Making</p>
+                            </div>
+
+                            <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-8">
+                                <h2 className="text-xl font-semibold text-gray-800 mb-3">Understanding Your Results</h2>
+                                <p className="text-gray-700 leading-relaxed">
+                                    These dilemmas revealed which virtues you naturally gravitate toward when facing moral choices. 
+                                    There are no "wrong" answers - each response reflects a different aspect of Christian character. 
+                                    Your profile shows your moral strengths while highlighting opportunities for growth in other virtues.
+                                </p>
+                            </div>
+
+                            <div className="space-y-6 mb-8">
+                                <h3 className="text-2xl font-bold text-gray-800">Your Top Three Virtues</h3>
+                                
+                                {topVirtues.map(([virtueKey, count], index) => {
+                                    const virtue = virtueInfo[virtueKey];
+                                    const VirtueIcon = virtue.icon;
+                                    const percentage = Math.round((count / totalResponses) * 100);
+                                    
+                                    return (
+                                        <div key={virtueKey} className="bg-white border-2 border-gray-200 rounded-xl p-6 fade-in">
+                                            <div className="flex items-start gap-4">
+                                                <div className={`flex-shrink-0 w-12 h-12 bg-gradient-to-r ${getVirtueColor(virtue.color)} rounded-lg flex items-center justify-center`}>
+                                                    <VirtueIcon className="w-6 h-6 text-white" />
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <h4 className="text-2xl font-bold text-gray-800">
+                                                            {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'} {virtue.name}
+                                                        </h4>
+                                                        <span className="text-2xl font-bold text-purple-600">{percentage}%</span>
+                                                    </div>
+                                                    <p className="text-gray-700 mb-3 leading-relaxed">{virtue.description}</p>
+                                                    <div className="bg-purple-50 border-l-4 border-purple-400 p-3 rounded">
+                                                        <p className="text-sm text-purple-900 italic">"{virtue.scripture}"</p>
+                                                    </div>
+                                                    <div className="mt-3">
+                                                        <div className="w-full bg-gray-200 rounded-full h-3">
+                                                            <div 
+                                                                className={`bg-gradient-to-r ${getVirtueColor(virtue.color)} h-3 rounded-full transition-all duration-1000`}
+                                                                style={{ width: `${percentage}%` }}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 mb-6">
+                                <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                                    <Sparkles className="w-5 h-5" />
+                                    Complete Virtue Breakdown
+                                </h3>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    {Object.entries(virtueScores)
+                                        .sort(([, a], [, b]) => b - a)
+                                        .map(([virtueKey, count]) => {
+                                            const virtue = virtueInfo[virtueKey];
+                                            const percentage = Math.round((count / totalResponses) * 100);
+                                            return (
+                                                <div key={virtueKey} className="bg-white rounded-lg p-3 text-center">
+                                                    <div className="text-lg font-bold text-gray-800">{virtue.name}</div>
+                                                    <div className="text-2xl font-bold text-purple-600">{percentage}%</div>
+                                                    <div className="text-sm text-gray-600">({count} times)</div>
+                                                </div>
+                                            );
+                                        })}
+                                </div>
+                            </div>
+
+                            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-6">
+                                <h3 className="text-xl font-semibold text-green-900 mb-3">Reflection Questions</h3>
+                                <ul className="space-y-2 text-gray-700">
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-green-600 font-bold">•</span>
+                                        <span>Were you surprised by your top virtues, or did they align with how you see yourself?</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-green-600 font-bold">•</span>
+                                        <span>Which virtues scored lower for you? How might you practice developing these?</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-green-600 font-bold">•</span>
+                                        <span>Can you think of real situations where you've demonstrated your top virtues?</span>
+                                    </li>
+                                    <li className="flex items-start gap-2">
+                                        <span className="text-green-600 font-bold">•</span>
+                                        <span>How do the Fruits of the Spirit connect to the concept of moral integrity you've been studying?</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-6 mb-6">
+                                <h3 className="text-xl font-semibold text-amber-900 mb-3">Remember</h3>
+                                <p className="text-gray-700 leading-relaxed">
+                                    Galatians 5:22-23 describes these virtues as "fruit of the Spirit" - they grow naturally as we 
+                                    nurture our relationship with God and intentionally practice Christlike character. No one perfectly 
+                                    embodies all virtues all the time. What matters is recognizing where God is already working in you 
+                                    and remaining open to growth in other areas. Your moral character is not fixed - it develops through 
+                                    conscious choices and the Holy Spirit's work in your life.
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={resetQuiz}
+                                className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg 
+                                         hover:from-purple-700 hover:to-pink-700 transition-all font-semibold text-lg shadow-lg"
+                            >
+                                Retake the Quiz
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+
+            const currentDilemma = dilemmas[currentQuestion];
+            const progress = ((currentQuestion + 1) / dilemmas.length) * 100;
+
+            return (
+                <div className="max-w-4xl mx-auto p-6">
+                    <div className="bg-white rounded-2xl shadow-2xl p-8">
+                        {/* Header */}
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800">Moral Dilemmas</h1>
+                                    <p className="text-gray-600 mt-1">Discovering Your Virtue Profile</p>
+                                </div>
+                                <div className="text-right">
+                                    <div className="text-sm text-gray-600">Dilemma {currentQuestion + 1} of {dilemmas.length}</div>
+                                </div>
+                            </div>
+                            
+                            {/* Progress Bar */}
+                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                <div 
+                                    className="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${progress}%` }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Scenario */}
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-6 mb-6">
+                            <div className="flex items-start gap-3 mb-4">
+                                <div className="flex-shrink-0 w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                                    {currentQuestion + 1}
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-semibold text-gray-800 mb-3 leading-relaxed">
+                                        {currentDilemma.scenario}
+                                    </h2>
+                                    <p className="text-gray-600 italic text-sm">
+                                        {currentDilemma.context}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Options */}
+                        <div className="mb-6">
+                            <h3 className="text-lg font-semibold text-gray-700 mb-4">How would you respond?</h3>
+                            <div className="space-y-3">
+                                {currentDilemma.options.map((option, index) => {
+                                    const isSelected = selectedAnswer === option;
+                                    const virtue = virtueInfo[option.virtue];
+                                    const VirtueIcon = virtue.icon;
+                                    
+                                    let buttonClass = "w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ";
+                                    
+                                    if (isSelected && showExplanation) {
+                                        buttonClass += `border-${virtue.color}-500 bg-${virtue.color}-50`;
+                                    } else if (isSelected) {
+                                        buttonClass += "border-purple-500 bg-purple-50";
+                                    } else {
+                                        buttonClass += "border-gray-300 hover:border-purple-400 hover:bg-purple-50 cursor-pointer";
+                                    }
+                                    
+                                    return (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleAnswerSelect(option)}
+                                            disabled={showExplanation}
+                                            className={buttonClass}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-gray-700 font-semibold">
+                                                    {String.fromCharCode(65 + index)}
+                                                </div>
+                                                <span className="font-medium text-gray-800 leading-relaxed flex-grow">
+                                                    {option.text}
+                                                </span>
+                                                {isSelected && showExplanation && (
+                                                    <div className={`flex-shrink-0 px-3 py-1 bg-gradient-to-r ${getVirtueColor(virtue.color)} rounded-full flex items-center gap-1`}>
+                                                        <VirtueIcon className="w-4 h-4 text-white" />
+                                                        <span className="text-white text-sm font-semibold">{virtue.name}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Explanation */}
+                        {showExplanation && selectedAnswer && (
+                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-6 fade-in">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex-shrink-0">
+                                        <Sparkles className="w-6 h-6 text-blue-600" />
+                                    </div>
+                                    <div className="flex-grow">
+                                        <h4 className="font-semibold text-blue-900 mb-2">
+                                            Your choice reflects: {virtueInfo[selectedAnswer.virtue].name}
+                                        </h4>
+                                        <p className="text-gray-700 leading-relaxed mb-3">
+                                            {selectedAnswer.reasoning}
+                                        </p>
+                                        <div className="bg-white rounded-lg p-3 border-l-4 border-blue-500">
+                                            <p className="text-sm text-gray-700">
+                                                <span className="font-semibold">Remember:</span> All responses show moral character - 
+                                                each virtue has value in different situations. There's wisdom in developing all the Fruits of the Spirit.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Navigation */}
+                        {showExplanation && (
+                            <button
+                                onClick={handleNext}
+                                className="w-full py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg 
+                                         hover:from-purple-700 hover:to-pink-700 transition-all font-semibold text-lg shadow-md"
+                            >
+                                {currentQuestion < dilemmas.length - 1 ? 'Next Dilemma →' : 'See My Virtue Profile 🎯'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MoralDilemmaQuiz />);
+    </script>
+</body>
+</html>
